@@ -1,0 +1,41 @@
+﻿@using ResourceManagement_Fe_App.Data.Transactions;
+@using ResourceManagement_Fe_App.Data;
+<h3>@Title</h3>
+
+<Table @ref="table"
+       TItem="Transaction"
+       DataSource="@Transactions"
+       Total="@TotalItems"
+       @bind-PageIndex="_pageIndex"
+       @bind-PageSize="_pageSize">
+    <PropertyColumn Property="c=>c.Title" Sortable />
+    <PropertyColumn Property="c=>c.Amount" Sortable />
+    <PropertyColumn Property="c=>c.TransactionDate" Sortable Format="yyyy-MM-dd"/>
+    <ActionColumn>
+        <Space>
+            <SpaceItem><Button>Delete</Button></SpaceItem>
+        </Space>
+    </ActionColumn>
+</Table>
+
+
+@code {
+    ITable table;
+
+    [Parameter]
+    public string Loading { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public int TotalItems { get; set; }
+
+    [Parameter]
+    public IEnumerable<Transaction> Transactions { get; set; }
+
+    int _pageIndex = 0;
+    int _pageSize = 10;
+    int _total = 0;
+
+}

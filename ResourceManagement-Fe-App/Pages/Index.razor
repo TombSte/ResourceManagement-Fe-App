@@ -1,9 +1,98 @@
 ﻿@page "/"
+@using ResourceManagement_Fe_App.Data.Transactions;
+@using ResourceManagement_Fe_App.Data;
+@using ResourceManagement_Fe_App.Helpers.Clients;
+@inject TransactionApiClient apiClient;
 
-<PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<Tabs @bind-ActiveKey="@activeKey" OnChange="OnTabChange" Animated TabBarExtraContentLeft="leftExtra">
+    <ChildContent>
+        <TabPane Tab="Tutte" Key="all">
+            <TransactionListView Title="Tutte le transazioni"
+                                 Transactions=@transactions
+                                 TotalItems="@totalItems" />
+        </TabPane>
+        <TabPane Tab="Entrata" Key="incoming">
+            <TransactionListView Title="Transazioni in Entrata"
+                                 Transactions=@transactions
+                                 TotalItems="@totalItems" />
+        </TabPane>
+        <TabPane Tab="Uscita" Key="outgoing">
+            <TransactionListView Title="Transazioni in Uscita"
+                                 Transactions=@transactions
+                                 TotalItems="@totalItems" />
+        </TabPane>
+    </ChildContent>
+</Tabs>
 
-Welcome to your new app.
+<Modal Title="@("Title")"
+       Visible="@_createVisibile"
+       OnOk="@HandleOk"
+       OnCancel="@HandleCancel"
+       ConfirmLoading="@_confirmCreateLoading">
+    <p>prova prova</p>
+</Modal>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+
+@code{
+
+    #region Get Transactions
+    IEnumerable<Transaction> transactions = new List<Transaction>();
+    int totalItems = 0;
+    string activeKey { get; set; } = "1";
+    bool loading = false;
+    async Task OnTabChange(string key)
+    {
+        Console.WriteLine($"tab change:{key}");
+        if (key.Equals("all"))
+        {
+            await GetTransactions();
+        }
+        else if (key.Equals("incoming"))
+        {
+            await GetTransactions(TransactionType.Incoming);
+        }
+        else if (key.Equals("outgoing"))
+        {
+            await GetTransactions(TransactionType.Outgoing);
+        }
+
+    }
+
+    async Task GetTransactions(TransactionType? transactionType = null)
+    {
+        loading = true;
+        var result = await apiClient.GetTransactionsAsync(0, 1000, transactionType);
+        transactions = result.Transactions;
+        totalItems = result.TotalItems;
+        loading = false;
+    }
+    #endregion
+
+    #region Add Transaction
+    RenderFragment leftExtra => @<Button Icon="plus" Type="text" OnClick="@ShowModal">
+        Nuova Transazione
+    </Button>;
+
+    bool _createVisibile = false;
+    bool _confirmCreateLoading = false;
+
+    private void ShowModal()
+    {
+        _createVisibile = true;
+    }
+
+    private async Task HandleOk(MouseEventArgs e)
+    {
+        //call api
+        _createVisibile = false;
+        _confirmCreateLoading = false;
+    }
+
+    private void HandleCancel(MouseEventArgs e)
+    {
+        Console.WriteLine("Clicked cancel button");
+        _createVisibile = false;
+    }
+    #endregion
+}

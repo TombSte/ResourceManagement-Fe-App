@@ -1,7 +1,9 @@
-﻿@inject IJSRuntime jsr
+﻿@using Microsoft.Extensions.Options;
+@using ResourceManagement_Fe_App.Helpers;
+@inject IJSRuntime jsr
 @inject HttpClient Http
 @inject IAuthenticationHelperWriter authHelper;
-
+@inject IOptions<ServerOptions> serverOptions;
 <p>
 	@if (string.IsNullOrEmpty(username))
 	{
@@ -53,7 +55,7 @@
 	private async Task OnValid()
 	{
 		isDisabled = true;
-		using (var msg = await Http.PostAsJsonAsync<LoginModel>("https://localhost:44337/auth/login", user, System.Threading.CancellationToken.None))
+		using (var msg = await Http.PostAsJsonAsync<LoginModel>($"{serverOptions.Value.BaseUrl}auth/login", user, System.Threading.CancellationToken.None))
 		{
 			if (msg.IsSuccessStatusCode)
 			{
@@ -66,8 +68,6 @@
 					await authHelper.SetLocalAsync(result.email, result.jwtBearer);
 					await OnLoginSucces.InvokeAsync();
 				}
-				
-				//await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{result.email};{result.jwtBearer}").ConfigureAwait(false);
 			}
 		}
 	}

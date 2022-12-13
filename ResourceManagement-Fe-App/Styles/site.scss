@@ -1,0 +1,10 @@
+﻿body {
+    .full-layout {
+        height: 100% !important;
+
+        > main > .site-layout-background {
+            height: 100%;
+            overflow: hidden;
+        }
+    }
+}

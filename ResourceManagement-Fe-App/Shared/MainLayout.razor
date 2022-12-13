@@ -3,13 +3,13 @@
 
 <AuthenticatedContent>
     <Authenticated>
-        <Layout>
+        <Layout Class="full-layout">
             <Header Style="position: fixed; z-index: 1; width: 100%; ">
                 <div class="logo" />
                 <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" DefaultSelectedKeys=@(new[]{"2"})>
-                    <MenuItem Key="1" RouterLink="/">Index</MenuItem>
-                    <MenuItem Key="2" RouterLink="/counter">Counter</MenuItem>
-                    <MenuItem Key="3" RouterLink="/fetchdata">FetchData</MenuItem>
+                    <MenuItem Key="1" RouterLink="/">Transactions</MenuItem>
+                    <MenuItem Key="2" RouterLink="/counter">Manage</MenuItem>
+                    <MenuItem Key="3" RouterLink="/fetchdata">Data Analysis</MenuItem>
                 </Menu>
             </Header>
             <Content Class="site-layout" Style="padding:0 50px; margin-top: 64px; ">
@@ -17,7 +17,7 @@
                     @Body
                 </div>
             </Content>
-            <Footer Style="text-align: center;">Ant Design ©2018 Created by Ant UED</Footer>
+            <Footer Style="text-align: center;"></Footer>
         </Layout>
     </Authenticated>
     <NotAuthenticated>
