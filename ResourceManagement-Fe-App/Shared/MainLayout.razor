@@ -1,19 +1,51 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavManager
 
-<PageTitle>ResourceManagement-Fe-App</PageTitle>
+<AuthenticatedContent>
+    <Authenticated>
+        <Layout>
+            <Header Style="position: fixed; z-index: 1; width: 100%; ">
+                <div class="logo" />
+                <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" DefaultSelectedKeys=@(new[]{"2"})>
+                    <MenuItem Key="1" RouterLink="/">Index</MenuItem>
+                    <MenuItem Key="2" RouterLink="/counter">Counter</MenuItem>
+                    <MenuItem Key="3" RouterLink="/fetchdata">FetchData</MenuItem>
+                </Menu>
+            </Header>
+            <Content Class="site-layout" Style="padding:0 50px; margin-top: 64px; ">
+                <div class="site-layout-background" style="padding: 24px; min-height: 380px ">
+                    @Body
+                </div>
+            </Content>
+            <Footer Style="text-align: center;">Ant Design ©2018 Created by Ant UED</Footer>
+        </Layout>
+    </Authenticated>
+    <NotAuthenticated>
+        <UserComponent OnLoginSucces="() => navigateTo()"></UserComponent>
+    </NotAuthenticated>
+</AuthenticatedContent>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@code{
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+    void navigateTo()
+    {
+        this.NavManager.NavigateTo("/");
+        StateHasChanged();
+        NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
+    }
+}
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+<style>
+    #components-layout-demo-fixed .logo {
+        width: 120px;
+        height: 31px;
+        background: rgba(255, 255, 255, 0.2);
+        margin: 16px 24px 16px 0;
+        float: left;
+    }
+
+    .site-layout .site-layout-background {
+        background: #fff;
+    }
+</style>
+

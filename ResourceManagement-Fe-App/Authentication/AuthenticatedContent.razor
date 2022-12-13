@@ -1,8 +1,5 @@
 ﻿@inject IAuthenticationHelper authHelper
 
-
-inner jwt: @jwt
-
 @Comp
 
 @code {
@@ -25,9 +22,7 @@ inner jwt: @jwt
             authenticated = await authHelper.IsLoggedAsync();
             StateHasChanged();
         }
-        
-        await base.OnAfterRenderAsync(firstRender);
-        
+        await base.OnAfterRenderAsync(firstRender);        
     }
 }
 

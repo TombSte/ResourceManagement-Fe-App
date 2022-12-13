@@ -5,6 +5,8 @@ using ResourceManagement_Fe_App.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAntDesign();
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
