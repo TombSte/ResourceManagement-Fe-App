@@ -1,8 +1,12 @@
 ﻿@using ResourceManagement_Fe_App.Data.Transactions;
 @using ResourceManagement_Fe_App.Data;
-<h3>@Title</h3>
+
+<div class="home-panel-title-row">
+    <h3>@Title</h3>
+</div>
 
 <Table @ref="table"
+    ScrollY="500px"
        TItem="TransactionShort"
        DataSource="@Transactions"
        Total="@TotalItems"

@@ -10,8 +10,60 @@
 }
 
 .home-toolbar {
-    .ant-tabs-extra-content{
+    height: 100%;
+
+    .ant-tabs-extra-content {
         margin-right: 15px;
+    }
+
+    .ant-tabs-content {
+        height: 100%;
+
+        .ant-tabs-tabpane {
+            height: 100%;
+
+            .home-panel-title-row {
+                height: 50px;
+            }
+
+            .ant-table-wrapper {
+                height: calc(100% - 50px);
+
+                .ant-spin-nested-loading {
+                    height: 100%;
+
+                    > div {
+                        height: 100%;
+
+                        .ant-spin-container {
+                            height: 100%;
+
+                            .ant-table {
+                                height: calc(100% - 64px);
+
+                                .ant-table-container {
+                                    height: 100%;
+
+                                    .ant-table-body {
+                                        height: calc(100% - 64px) !important;
+                                        max-height: unset !important;
+                                        overflow-y: auto
+                                    }
+
+                                    .ant-table-content {
+                                        height: 100%;
+
+                                        table {
+                                            height: 100%;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
