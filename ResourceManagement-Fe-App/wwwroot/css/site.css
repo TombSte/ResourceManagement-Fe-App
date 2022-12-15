@@ -5,3 +5,16 @@ body .full-layout > main > .site-layout-background {
   height: 100%;
   overflow: hidden;
 }
+
+.home-toolbar .ant-tabs-extra-content {
+  margin-right: 15px;
+}
+
+.unauthorized-layout {
+  background: #ECECEC;
+  padding: 30px;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

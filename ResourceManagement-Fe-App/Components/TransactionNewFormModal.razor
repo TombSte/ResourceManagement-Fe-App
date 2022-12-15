@@ -1,0 +1,52 @@
+﻿@using ResourceManagement_Fe_App.Data.Forms;
+@using ResourceManagement_Fe_App.Helpers.Clients;
+@inject TransactionApiClient apiClient;
+
+<Modal Title="@("Nuova Transazione")"
+       Visible="@IsOpen"
+       OnOk="@HandleOk"
+       OnCancel="@HandleCancel"
+       ConfirmLoading="@_confirmCreateLoading">
+    <p>
+        <TransactionForm DefaultValue="newValue"
+                         FormMode="Components.Data.FormMode.New"
+                         />
+    </p>
+</Modal>
+
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback OnSuccess { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+
+    bool _confirmCreateLoading = false;
+
+    TransactionFormData newValue = new();
+
+    protected override void OnParametersSet()
+    {
+        newValue = new();
+        base.OnParametersSet();
+    }
+
+    private async Task HandleOk(MouseEventArgs e)
+    {
+        //call api
+        await apiClient.AddTransactionAsync(newValue);
+        await OnSuccess.InvokeAsync();
+        _confirmCreateLoading = false;
+    }
+
+    private async Task HandleCancel(MouseEventArgs e)
+    {
+        Console.WriteLine("Clicked cancel button");
+        await OnClose.InvokeAsync();
+    }
+}

@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavManager
-
+@inject IAuthenticationHelperWriter authHelper;
 <AuthenticatedContent>
     <Authenticated>
         <Layout Class="full-layout">
@@ -10,6 +10,10 @@
                     <MenuItem Key="1" RouterLink="/">Transactions</MenuItem>
                     <MenuItem Key="2" RouterLink="/counter">Manage</MenuItem>
                     <MenuItem Key="3" RouterLink="/fetchdata">Data Analysis</MenuItem>
+                    <MenuItem OnClick="Logout" Style="right: 0; position: absolute;">
+                        Logout
+                    </MenuItem>
+                    
                 </Menu>
             </Header>
             <Content Class="site-layout" Style="padding:0 50px; margin-top: 64px; ">
@@ -26,6 +30,12 @@
 </AuthenticatedContent>
 
 @code{
+
+    async Task Logout()
+    {
+        await authHelper.Logout();
+        navigateTo();
+    }
 
     void navigateTo()
     {

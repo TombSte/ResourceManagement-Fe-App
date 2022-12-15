@@ -2,7 +2,7 @@
 {
     public class TransactionResult
     {
-        public IEnumerable<Transaction> Transactions { get; set; }
+        public IEnumerable<TransactionShort> Transactions { get; set; }
         public int TotalItems { get; set; }
     }
 }

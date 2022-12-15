@@ -4,35 +4,35 @@
 @inject HttpClient Http
 @inject IAuthenticationHelperWriter authHelper;
 @inject IOptions<ServerOptions> serverOptions;
-<p>
-	@if (string.IsNullOrEmpty(username))
-	{
-		<EditForm Model="user" OnValidSubmit="OnValid" style="max-width:500px;">
-			<DataAnnotationsValidator />
-			<ValidationSummary />
-			<div class="mb-2">
-				<InputText class="form-control" @bind-Value="user.email" placeholder="Enter Email"></InputText>
-			</div>
-			<div class="mb-2">
-				<InputText type="password" class="form-control" @bind-Value="user.password" placeholder="Enter Password"></InputText>
-			</div>
-			<div class="mb-2 text-right">
-				<button class="btn btn-secondary" disabled="@isDisabled">login</button>
-			</div>
-		</EditForm>
-	}
-	else
-	{
-		<span>Hello, @username <a href="/logout">(Logout)</a></span>
-	}
-</p>
 
+
+<div class="unauthorized-layout">
+	<Card Bordered="false" Title=@("Benvenuto!") Style="width: 300px">
+		<Body>
+			<Form Model="user" style="max-width:500px;" LabelColSpan="8"
+				  WrapperColSpan="24">
+				<DataAnnotationsValidator />
+				<ValidationSummary />
+				<FormItem>
+					<Input class="form-control" @bind-Value="user.email" placeholder="Enter Email"></Input>
+				</FormItem>
+				<FormItem>
+					<Input type="password" class="form-control" @bind-Value="user.password" placeholder="Enter Password"></Input>
+				</FormItem>
+				<FormItem>
+					<Button class="btn btn-secondary" Disabled="@isDisabled" OnClick="OnValid">login</Button>
+				</FormItem>
+			</Form>
+		</Body>
+	</Card>
+</div>
 @code {
 
 	string username = string.Empty;
 	[Parameter]
 	public EventCallback OnLoginSucces { get; set; }
 
+	EmbeddedProperty Property(int span, int offset) => new() { Span = span, Offset = offset };
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{

@@ -8,3 +8,18 @@
         }
     }
 }
+
+.home-toolbar {
+    .ant-tabs-extra-content{
+        margin-right: 15px;
+    }
+}
+
+.unauthorized-layout {
+    background: #ECECEC;
+    padding: 30px;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}

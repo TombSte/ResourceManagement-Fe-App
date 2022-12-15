@@ -3,11 +3,12 @@
 <h3>@Title</h3>
 
 <Table @ref="table"
-       TItem="Transaction"
+       TItem="TransactionShort"
        DataSource="@Transactions"
        Total="@TotalItems"
-       @bind-PageIndex="_pageIndex"
-       @bind-PageSize="_pageSize">
+       @bind-PageIndex="PageIndex"
+       @bind-PageSize="PageSize"
+       OnPageIndexChange="onChangePageIndex">
     <PropertyColumn Property="c=>c.Title" Sortable />
     <PropertyColumn Property="c=>c.Amount" Sortable />
     <PropertyColumn Property="c=>c.TransactionDate" Sortable Format="yyyy-MM-dd"/>
@@ -30,12 +31,22 @@
 
     [Parameter]
     public int TotalItems { get; set; }
+    
+    [Parameter]
+    public int PageSize { get; set; }
 
     [Parameter]
-    public IEnumerable<Transaction> Transactions { get; set; }
+    public int PageIndex { get; set; }
 
-    int _pageIndex = 0;
-    int _pageSize = 10;
-    int _total = 0;
+    [Parameter]
+    public EventCallback<int> OnPageIndexChange { get; set; }
+
+    [Parameter]
+    public IEnumerable<TransactionShort> Transactions { get; set; }
+
+    private async Task onChangePageIndex(PaginationEventArgs arg)
+    {
+        await OnPageIndexChange.InvokeAsync(arg.Page);
+    }
 
 }

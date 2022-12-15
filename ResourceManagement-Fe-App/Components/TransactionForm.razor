@@ -1,0 +1,164 @@
+﻿@using ResourceManagement_Fe_App.Components.Data;
+@using ResourceManagement_Fe_App.Data.Forms;
+@using System.Text.Json;
+@using ResourceManagement_Fe_App.Data;
+@using ResourceManagement_Fe_App.Data.Transactions;
+@using ResourceManagement_Fe_App.Helpers.Clients;
+@inject TransactionApiClient apiClient;
+
+<Form Layout="@FormLayout.Vertical"
+      LabelCol="fieldColSpan"
+      WrapperCol="valueColSpan"
+      Model="@DefaultValue"
+      OnFinish="OnFinish" 
+      OnFinishFailed="OnFinishFailed">
+
+    <FormItem Label="Titolo">
+        <Input Style="width:100%;" @bind-Value="@context.Title" />
+    </FormItem>
+
+    <FormItem Label="Data">
+        <DatePicker Style="width:100%;" TValue="DateTime?" Picker="@DatePickerType.Date" @bind-Value="@context.TransactionDate" />
+    </FormItem>
+
+    <FormItem Label="Tipologia">
+        <Select TItem="TransactionFormType"
+                TItemValue="string"
+                DataSource="@typeItems"
+                @bind-Value="selectedType"
+                LabelName="@nameof(TransactionFormType.Name)"
+                ValueName="@nameof(TransactionFormType.Name)"
+                Placeholder="Seleziona una tipologia"
+                DefaultActiveFirstOption="false"
+                OnSelectedItemChanged="OnSelectedTypeChangedHandler"
+                EnableSearch>
+                Seleziona
+        </Select>
+    </FormItem>
+
+    <FormItem Label="Categoria">
+        <SimpleSelect @bind-Value="selectedCategory" Style="width:100%;" OnSelectedItemChanged="OnSelectedCategoryChangedHandler">
+            <SelectOptions>
+                @foreach (var item in categories)
+                {
+                    <SimpleSelectOption Value=@item.Id.ToString() Label=@item.Name></SimpleSelectOption>
+                }
+            </SelectOptions>
+        </SimpleSelect>
+    </FormItem>
+    
+    <FormItem Label="Categoria Secondaria">
+        <SimpleSelect @bind-Value="selectedSecondCategory" Style="width:100%;" OnSelectedItemChanged="OnSelectedSecondaryCategoryChangedHandler">
+            <SelectOptions>
+                @foreach (var item in secondCategories)
+                {
+                    <SimpleSelectOption Value=@item.Id.ToString() Label=@item.Name></SimpleSelectOption>
+                }
+            </SelectOptions>
+        </SimpleSelect>
+    </FormItem>
+</Form>
+
+@code {
+
+    [Parameter]
+    public FormMode FormMode { get; set; }
+
+    [Parameter]
+    public TransactionFormData DefaultValue { get; set; } = new();
+
+    ColLayoutParam fieldColSpan = new ColLayoutParam { Span = "24" };
+    ColLayoutParam valueColSpan = new ColLayoutParam { Span = "24" };
+    ColLayoutParam commandsColSpan = new ColLayoutParam { Span = "24" };
+    string selectedType = "";
+    string selectedCategory = "";
+    string selectedSecondCategory = "";
+
+    IEnumerable<Category> categories = new List<Category>();
+    IEnumerable<SecondaryCategory> secondCategories = new List<SecondaryCategory>();
+
+    IEnumerable<TransactionFormType> typeItems = new List<TransactionFormType>()
+    {
+        new()
+        {
+            Type = TransactionType.Outgoing,
+            Name = "Uscita",
+        },
+        new()
+        {
+            Type = TransactionType.Incoming,
+            Name = "Entrata"
+        }
+    };
+
+    private void OnFinish(EditContext editContext)
+    {
+        Console.WriteLine($"Success:{JsonSerializer.Serialize(DefaultValue)}");
+    }
+
+    private void OnFinishFailed(EditContext editContext)
+    {
+        Console.WriteLine($"Failed:{JsonSerializer.Serialize(DefaultValue)}");
+    }
+
+    private void OnSelectedTypeChangedHandler(TransactionFormType value)
+    {
+        DefaultValue.Type = value.Type;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var result = await apiClient.GetCategoriesAsync();
+            this.categories = result;
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task OnSelectedCategoryChangedHandler(string value)
+    {
+        DefaultValue.CategoryId = Convert.ToInt32(value);
+        var result = await apiClient.GetSecondaryCategoriesAsync(DefaultValue.CategoryId);
+        this.secondCategories = result;
+        this.selectedSecondCategory = "";
+    }
+
+    private async Task OnSelectedSecondaryCategoryChangedHandler(string value)
+    {
+        DefaultValue.SecondCategoryId = Convert.ToInt32(value);
+    }
+
+
+    class TransactionFormType
+    {
+        public TransactionType Type { get; set; }
+        public string Name { get; set; }
+
+        public static string PrintType(TransactionType type)
+        {
+            switch (type)
+            {
+                case TransactionType.Incoming:
+                    return "Uscita"; break;
+                case TransactionType.Outgoing:
+                    return "Entrata"; break;
+            }
+            return "";
+        }
+        public static TransactionType GetType(string type)
+        {
+            switch (type)
+            {
+                case "Uscita":
+                    return TransactionType.Outgoing; break;
+                case "Entrata":
+                    return TransactionType.Incoming; break;
+            }
+            return TransactionType.Outgoing;
+        }
+    }
+
+
+}

@@ -1,5 +1,6 @@
 ﻿
 using ResourceManagement_Fe_App.Data;
+using ResourceManagement_Fe_App.Data.Forms;
 using ResourceManagement_Fe_App.Data.Transactions;
 
 namespace ResourceManagement_Fe_App.Helpers.Clients
@@ -17,7 +18,24 @@ namespace ResourceManagement_Fe_App.Helpers.Clients
 		{
 			string transactionTypeQuery = transactionType.HasValue ? $"&TransactionType={transactionType.Value}" : "";
 
-            return await this.rmHttpClient.GetAsync<TransactionResult>($"transaction/getall?PageSize={pageSize}&PageIndex={pageIndex}{transactionTypeQuery}");
+            var result = await this.rmHttpClient.GetAsync<TransactionResult>($"transaction/getall?PageSize={pageSize}&PageIndex={pageIndex}{transactionTypeQuery}");
+			return result.Value;
+		}
+
+        public async Task<IEnumerable<Category>> GetCategoriesAsync()
+        {
+            var result = await this.rmHttpClient.GetAsync<IEnumerable<Category>>($"Category/getall");
+            return result.Value;
+        }
+		public async Task<IEnumerable<SecondaryCategory>> GetSecondaryCategoriesAsync(int categoryId)
+        {
+            var result = await this.rmHttpClient.GetAsync<IEnumerable<SecondaryCategory>>($"Category/getallsecondary?categoryId={categoryId}");
+            return result.Value;
+        }
+
+        public async Task AddTransactionAsync(TransactionFormData data)
+		{
+            await this.rmHttpClient.PostAsync($"transaction/add", data);
 		}
 	}
 }

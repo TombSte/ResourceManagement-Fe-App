@@ -1,98 +1,107 @@
 ﻿@page "/"
+@using ResourceManagement_Fe_App.Data.Forms;
 @using ResourceManagement_Fe_App.Data.Transactions;
 @using ResourceManagement_Fe_App.Data;
 @using ResourceManagement_Fe_App.Helpers.Clients;
 @inject TransactionApiClient apiClient;
 
 
-<Tabs @bind-ActiveKey="@activeKey" OnChange="OnTabChange" Animated TabBarExtraContentLeft="leftExtra">
+<Tabs Class="home-toolbar" @bind-ActiveKey="@activeKey" OnChange="OnTabChange" Animated TabBarExtraContentLeft="leftExtra">
     <ChildContent>
         <TabPane Tab="Tutte" Key="all">
             <TransactionListView Title="Tutte le transazioni"
                                  Transactions=@transactions
-                                 TotalItems="@totalItems" />
+                                 TotalItems="@totalItems" 
+                                 PageSize="@pageSize" 
+                                 PageIndex="@pageIndex" 
+                                 OnPageIndexChange="OnChangePageIndex"/>
         </TabPane>
         <TabPane Tab="Entrata" Key="incoming">
             <TransactionListView Title="Transazioni in Entrata"
                                  Transactions=@transactions
-                                 TotalItems="@totalItems" />
+                                 TotalItems="@totalItems" 
+                                 PageSize="@pageSize"
+                                 PageIndex="@pageIndex" 
+                                 OnPageIndexChange="OnChangePageIndex" />
         </TabPane>
         <TabPane Tab="Uscita" Key="outgoing">
             <TransactionListView Title="Transazioni in Uscita"
                                  Transactions=@transactions
-                                 TotalItems="@totalItems" />
+                                 TotalItems="@totalItems" 
+                                 PageSize="@pageSize"
+                                 PageIndex="@pageIndex" 
+                                 OnPageIndexChange="OnChangePageIndex" />
         </TabPane>
     </ChildContent>
 </Tabs>
 
-<Modal Title="@("Title")"
-       Visible="@_createVisibile"
-       OnOk="@HandleOk"
-       OnCancel="@HandleCancel"
-       ConfirmLoading="@_confirmCreateLoading">
-    <p>prova prova</p>
-</Modal>
 
-
+<TransactionNewFormModal 
+    IsOpen=@_createVisibile
+        OnSuccess="async () => { _createVisibile = false; pageIndex = 1; await GetTransactions();  }"
+        OnClose="() => { _createVisibile = false; }" />
 @code{
 
     #region Get Transactions
-    IEnumerable<Transaction> transactions = new List<Transaction>();
+    IEnumerable<TransactionShort> transactions = new List<TransactionShort>();
     int totalItems = 0;
+    int pageIndex = 1;
+    const int pageSize = 10;
     string activeKey { get; set; } = "1";
     bool loading = false;
+    TransactionType? currentType = null;
+
     async Task OnTabChange(string key)
     {
+        pageIndex = 1;
         Console.WriteLine($"tab change:{key}");
         if (key.Equals("all"))
         {
+            currentType = null;
             await GetTransactions();
         }
         else if (key.Equals("incoming"))
         {
-            await GetTransactions(TransactionType.Incoming);
+            currentType = TransactionType.Incoming;
+            await GetTransactions();
         }
         else if (key.Equals("outgoing"))
         {
-            await GetTransactions(TransactionType.Outgoing);
+            currentType = TransactionType.Outgoing;
+            await GetTransactions();
         }
 
     }
 
-    async Task GetTransactions(TransactionType? transactionType = null)
+    async Task OnChangePageIndex(int pageIndex)
+    {
+        this.pageIndex = pageIndex;
+        await GetTransactions();
+    }
+
+    async Task GetTransactions()
     {
         loading = true;
-        var result = await apiClient.GetTransactionsAsync(0, 1000, transactionType);
+        var result = await apiClient.GetTransactionsAsync(pageIndex - 1, pageSize, currentType);
         transactions = result.Transactions;
         totalItems = result.TotalItems;
         loading = false;
     }
     #endregion
 
-    #region Add Transaction
-    RenderFragment leftExtra => @<Button Icon="plus" Type="text" OnClick="@ShowModal">
-        Nuova Transazione
-    </Button>;
-
-    bool _createVisibile = false;
-    bool _confirmCreateLoading = false;
-
     private void ShowModal()
     {
         _createVisibile = true;
     }
 
-    private async Task HandleOk(MouseEventArgs e)
-    {
-        //call api
-        _createVisibile = false;
-        _confirmCreateLoading = false;
-    }
+    #region Add Transaction
+    RenderFragment leftExtra => 
+    @<Button Icon="plus" Type="text" OnClick="@ShowModal">
+        Nuova Transazione
+        </Button>
+    ;
 
-    private void HandleCancel(MouseEventArgs e)
-    {
-        Console.WriteLine("Clicked cancel button");
-        _createVisibile = false;
-    }
+    bool _createVisibile = false;
+    
     #endregion
 }
