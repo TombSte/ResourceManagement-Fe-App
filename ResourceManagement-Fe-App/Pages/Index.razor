@@ -5,7 +5,6 @@
 @using ResourceManagement_Fe_App.Helpers.Clients;
 @inject TransactionApiClient apiClient;
 
-
 <Tabs Class="home-toolbar" @bind-ActiveKey="@activeKey" OnChange="OnTabChange" Animated TabBarExtraContentLeft="leftExtra">
     <ChildContent>
         <TabPane Tab="Tutte" Key="all">
@@ -38,7 +37,12 @@
 
 <TransactionNewFormModal 
     IsOpen=@_createVisibile
-        OnSuccess="async () => { _createVisibile = false; pageIndex = 1; await GetTransactions();  }"
+        OnSuccess="async () => 
+        { 
+            _createVisibile = false;
+            pageIndex = 1;  
+            await GetTransactions();
+        }"
         OnClose="() => { _createVisibile = false; }" />
 @code{
 

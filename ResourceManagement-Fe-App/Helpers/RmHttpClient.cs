@@ -15,10 +15,16 @@ namespace ResourceManagement_Fe_App.Helpers
         public T Value { get; set; }
     }
 
-	public interface IRmHttpClient
+    public class HttpResult
+    {
+        public bool Success { get; set; }
+    }
+
+    public interface IRmHttpClient
 	{
+		public Task<HttpResult> DeleteAsync(string url);
 		public Task<HttpResult<TResponse>> GetAsync<TResponse>(string url);
-		public Task PostAsync<TBody>(string url, TBody body);
+		public Task<HttpResult> PostAsync<TBody>(string url, TBody body);
 		public Task<HttpResult<TResponse>> PostAsync<TBody, TResponse>(string url, TBody body);
 	}
 	public class RmHttpClient : IRmHttpClient
@@ -75,19 +81,44 @@ namespace ResourceManagement_Fe_App.Helpers
             
 		}
 
-        public async Task PostAsync<TBody>(string url, TBody body)
+        public async Task<HttpResult> DeleteAsync(string url)
         {
             await SetToken();
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
-            var response = await this.apiClient.PostAsJsonAsync(url, body);
-            if (!response.IsSuccessStatusCode)
+            try
+            {
+                var response = await this.apiClient.DeleteAsync(url);
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception)
             {
                 ErrorNotification();
-                return;
+                return new Helpers.HttpResult() { Success = false };
             }
+            return new Helpers.HttpResult() { Success = true };
+        }
+
+        public async Task<HttpResult> PostAsync<TBody>(string url, TBody body)
+        {
+            await SetToken();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            try
+            {
+                var response = await this.apiClient.PostAsJsonAsync(url, body);
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception)
+            {
+                ErrorNotification();
+                return new Helpers.HttpResult() { Success = false };
+            }
+            return new Helpers.HttpResult() { Success = true };
         }
 
         public async Task<HttpResult<TResponse>> PostAsync<TBody, TResponse>(string url, TBody body)

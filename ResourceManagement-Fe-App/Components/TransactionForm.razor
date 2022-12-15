@@ -45,6 +45,12 @@
                 }
             </SelectOptions>
         </SimpleSelect>
+        
+        
+        <Row Style="margin-top: 10px">
+            <Button Type="@ButtonType.Primary" Icon="@IconType.Outline.Plus" OnClick="() => newCategoriIsOpen = true">Aggiungi</Button>
+        </Row>
+        
     </FormItem>
     
     <FormItem Label="Categoria Secondaria">
@@ -56,8 +62,69 @@
                 }
             </SelectOptions>
         </SimpleSelect>
+
+        <Row Style="margin-top: 10px">
+            <Button Type="@ButtonType.Primary" Icon="@IconType.Outline.Plus" OnClick="() => newSecondaryCategoriIsOpen = true">Aggiungi</Button>
+        </Row>
     </FormItem>
 </Form>
+
+
+@*Add category modal*@
+<Modal 
+    DestroyOnClose=true
+    Title="Nuova Categoria"
+    Width="400"
+    Centered="true"
+    OnCancel="() => newCategoriIsOpen = false"
+    Visible=@newCategoriIsOpen
+    OnOk="async () => {
+        newCategoriIsOpen = false;
+        await CreateCategory(newCategory);
+        await UpdateCategories();
+    }"
+    >
+    <p>
+        <Text>Nome</Text>
+        <Input Style="width:100%;" @bind-Value="@newCategory" />
+    </p>
+
+</Modal>
+
+@*Add secondary category modal*@
+<Modal DestroyOnClose=true
+       Title="Nuova Categoria Secondaria"
+       Width="400"
+       Centered="true"
+       OnCancel="() => newSecondaryCategoriIsOpen = false"
+       Visible=@newSecondaryCategoriIsOpen
+       OnOk="async () => {
+        await CreateSecondaryCategory(newSecondaryCategory);
+        newSecondaryCategoriIsOpen = false;
+        await UpdateSecondaryCategories();
+    }">
+    <p>
+        <Row Style="margin-bottom: 10px">
+            <Text>Categoria associata</Text>
+            <SimpleSelect Style="width:100%;" OnSelectedItemChanged="OnSelectedCategoryToCreateSecondaryChangedHandler">
+                <SelectOptions>
+                    @foreach (var item in categories)
+                    {
+                        <SimpleSelectOption Value=@item.Id.ToString() Label=@item.Name></SimpleSelectOption>
+                    }
+                </SelectOptions>
+            </SimpleSelect>
+        </Row>
+        
+        <Row Style="margin-bottom: 10px">
+            <Text>Nome</Text>
+            <Input Style="width:100%;" @bind-Value="@newSecondaryCategory" />
+        </Row>
+        
+    </p>
+
+</Modal>
+
 
 @code {
 
@@ -70,6 +137,13 @@
     ColLayoutParam fieldColSpan = new ColLayoutParam { Span = "24" };
     ColLayoutParam valueColSpan = new ColLayoutParam { Span = "24" };
     ColLayoutParam commandsColSpan = new ColLayoutParam { Span = "24" };
+
+    bool newCategoriIsOpen = false;
+    bool newSecondaryCategoriIsOpen = false;
+    string newCategory = "";
+    int categoryToCreateSecondary = 0;
+    string newSecondaryCategory = "";
+
     string selectedType = "";
     string selectedCategory = "";
     string selectedSecondCategory = "";
@@ -106,12 +180,23 @@
         DefaultValue.Type = value.Type;
     }
 
+    private async Task UpdateCategories()
+    {
+        var result = await apiClient.GetCategoriesAsync();
+        this.categories = result;
+    }
+    private async Task UpdateSecondaryCategories()
+    {
+        this.secondCategories = new List<SecondaryCategory>();
+        var result = await apiClient.GetSecondaryCategoriesAsync(DefaultValue.CategoryId);
+        this.secondCategories = result;
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            var result = await apiClient.GetCategoriesAsync();
-            this.categories = result;
+            await UpdateCategories();
         }
 
         await base.OnAfterRenderAsync(firstRender);
@@ -120,8 +205,7 @@
     private async Task OnSelectedCategoryChangedHandler(string value)
     {
         DefaultValue.CategoryId = Convert.ToInt32(value);
-        var result = await apiClient.GetSecondaryCategoriesAsync(DefaultValue.CategoryId);
-        this.secondCategories = result;
+        await UpdateSecondaryCategories();
         this.selectedSecondCategory = "";
     }
 
@@ -130,6 +214,28 @@
         DefaultValue.SecondCategoryId = Convert.ToInt32(value);
     }
 
+
+    private async Task OnSelectedCategoryToCreateSecondaryChangedHandler(string value)
+    {
+        this.categoryToCreateSecondary = Convert.ToInt32(value);
+    }
+
+    private async Task CreateCategory(string categoryName)
+    {
+        await apiClient.AddCategory(new AddCategory()
+            {
+                Name = categoryName
+            });
+    }
+
+    private async Task CreateSecondaryCategory(string secondaryCategoryName)
+    {
+        await apiClient.AddSecondaryCategory(new AddSecondaryCategory()
+            {
+                CategoryId = this.categoryToCreateSecondary,
+                Name = secondaryCategoryName
+            });
+    }
 
     class TransactionFormType
     {

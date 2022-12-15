@@ -1,5 +1,8 @@
 ﻿@using ResourceManagement_Fe_App.Data.Transactions;
 @using ResourceManagement_Fe_App.Data;
+@using ResourceManagement_Fe_App.Helpers.Clients;
+@inject ModalService _modalService;
+@inject TransactionApiClient apiClient;
 
 <div class="home-panel-title-row">
     <h3>@Title</h3>
@@ -18,7 +21,14 @@
     <PropertyColumn Property="c=>c.TransactionDate" Sortable Format="yyyy-MM-dd"/>
     <ActionColumn>
         <Space>
-            <SpaceItem><Button>Delete</Button></SpaceItem>
+            <SpaceItem>
+                <Button 
+                     Danger 
+                     Type="@ButtonType.Primary"
+                        OnClick="() => ShowDeleteConfirm(context.Id)">
+                    Delete
+                </Button>
+            </SpaceItem>
         </Space>
     </ActionColumn>
 </Table>
@@ -53,4 +63,22 @@
         await OnPageIndexChange.InvokeAsync(arg.Page);
     }
 
+    private void ShowDeleteConfirm(long transactionId)
+    {
+        RenderFragment icon =@<Icon Type="exclamation-circle" Theme="outline"></Icon>;
+
+        _modalService.Confirm(new ConfirmOptions()
+            {
+                Title = "Cancellare la transazione?",
+                Icon = icon,
+                Content = "Una volta cancellata la transazione non è più possibile eliminarla. Confermare?",
+                OnOk = async (ModalClosingEventArgs e) =>
+                {
+                    e.Cancel = true;
+                    await apiClient.DeleteTransaction(transactionId);
+                    await OnPageIndexChange.InvokeAsync(this.PageIndex);
+                    
+                }
+            });
+    }
 }
