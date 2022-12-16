@@ -4,15 +4,17 @@
 
 <Modal Title="@("Nuova Transazione")"
        Visible="@IsOpen"
-       OnOk="@HandleOk"
-       OnCancel="@HandleCancel"
        DestroyOnClose=true
-       ConfirmLoading="@_confirmCreateLoading">
-    <p>
+       ConfirmLoading="@_confirmCreateLoading"
+       OnOk="@HandleOk" 
+       OkButtonProps="new AntDesign.ButtonProps(){ Disabled = !this._canSave }"
+       OnCancel="@HandleCancel">
+        
         <TransactionForm DefaultValue="Transaction"
-                         FormMode="Components.Data.FormMode.New"
-                         />
-    </p>
+                            OnFieldIsChanged="OnFieldChange"
+                            OnValidationFailed="() => _canSave = false"
+                            OnValidationPassed="() => _canSave = true"
+                            FormMode="Components.Data.FormMode.New" />        
 </Modal>
 
 
@@ -30,7 +32,7 @@
     [Parameter]
     public EventCallback OnClose { get; set; }
 
-
+    bool _canSave = false;
     bool _confirmCreateLoading = false;
 
     protected override void OnParametersSet()
@@ -41,14 +43,19 @@
     private async Task HandleOk(MouseEventArgs e)
     {
         await apiClient.UpdateTransactionAsync(Transaction);
-
-        await OnSuccess.InvokeAsync();
+        IsOpen = false;
         _confirmCreateLoading = false;
+        OnSuccess.InvokeAsync();
     }
 
     private async Task HandleCancel(MouseEventArgs e)
     {
         Console.WriteLine("Clicked cancel button");
         await OnClose.InvokeAsync();
+    }
+
+    private async Task OnFieldChange(TransactionFormData data)
+    {
+        
     }
 }

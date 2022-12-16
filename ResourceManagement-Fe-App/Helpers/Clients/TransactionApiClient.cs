@@ -2,12 +2,13 @@
 using AntDesign;
 using OneOf.Types;
 using ResourceManagement_Fe_App.Data;
+using ResourceManagement_Fe_App.Data.ApiModel;
 using ResourceManagement_Fe_App.Data.Forms;
 using ResourceManagement_Fe_App.Data.Transactions;
 
 namespace ResourceManagement_Fe_App.Helpers.Clients
 {
-	public class TransactionApiClient
+    public class TransactionApiClient
 	{
 		public readonly IRmHttpClient rmHttpClient;
         private readonly NotificationService _notice;
@@ -49,14 +50,20 @@ namespace ResourceManagement_Fe_App.Helpers.Clients
         }
 		public async Task<IEnumerable<SecondaryCategory>> GetSecondaryCategoriesAsync(int categoryId)
         {
-            var result = await this.rmHttpClient.GetAsync<IEnumerable<SecondaryCategory>>($"Category/getallsecondary?categoryId={categoryId}");
+            var result = await this.rmHttpClient.GetAsync<IEnumerable<SecondaryCategory>>($"Category/getsecondarycategories?categoryId={categoryId}");
+            return result.Value;
+        }
+
+        public async Task<IEnumerable<SecondaryCategory>> GetSecondaryCategoriesAsync()
+        {
+            var result = await this.rmHttpClient.GetAsync<IEnumerable<SecondaryCategory>>($"Category/getallsecondary");
             return result.Value;
         }
 
         public async Task AddTransactionAsync(TransactionFormData data)
 		{
             var result = await this.rmHttpClient.PostAsync($"transaction/add", data);
-            if (result.Success) await _notice.Success(new NotificationConfig
+            if (result.Success) _notice.Success(new NotificationConfig
             {
                 Message = "Completato! ",
                 Description = "Transazione aggiunta con successo"
@@ -65,17 +72,43 @@ namespace ResourceManagement_Fe_App.Helpers.Clients
         public async Task UpdateTransactionAsync(TransactionFormData data)
 		{
             var result = await this.rmHttpClient.PutAsync($"transaction", data);
-            if (result.Success) await _notice.Success(new NotificationConfig
+            if (result.Success) _notice.Success(new NotificationConfig
             {
                 Message = "Completato! ",
                 Description = "Transazione aggiornata con successo"
             });
         }
 
+        public async Task UpdateCategoriesAsync(IEnumerable<Category> categories)
+        {
+            var result = await this.rmHttpClient.PutAsync($"category/updatemany", new UpdateCategories()
+            {
+                Categories = categories
+            });
+            if (result.Success) _notice.Success(new NotificationConfig
+            {
+                Message = "Completato! ",
+                Description = "Categorie aggiornate con successo"
+            });
+        }
+        public async Task UpdateSecondaryCategoriesAsync(IEnumerable<SecondaryCategory> categories)
+        {
+            var result = await this.rmHttpClient.PutAsync($"category/updatesecondarymany", new UpdateSecondaryCategories()
+            {
+                SecondaryCategories = categories
+            });
+            if (result.Success) _notice.Success(new NotificationConfig
+            {
+                Message = "Completato! ",
+                Description = "Categorie aggiornate con successo"
+            });
+        }
+
+
         public async Task AddCategory(AddCategory data)
         {
             var result = await this.rmHttpClient.PostAsync($"category/add", data);
-            if (result.Success) await _notice.Success(new NotificationConfig
+            if (result.Success) _notice.Success(new NotificationConfig
             {
                 Message = "Completato! ",
                 Description = "Categoria aggiunta con successo"
@@ -85,7 +118,7 @@ namespace ResourceManagement_Fe_App.Helpers.Clients
         public async Task AddSecondaryCategory(AddSecondaryCategory data)
         {
             var result = await this.rmHttpClient.PostAsync($"category/addsecondary", data);
-            if (result.Success) await _notice.Success(new NotificationConfig
+            if (result.Success) _notice.Success(new NotificationConfig
             {
                 Message = "Completato! ",
                 Description = "Categoria secondaria aggiunta con successo"
@@ -95,7 +128,7 @@ namespace ResourceManagement_Fe_App.Helpers.Clients
         public async Task DeleteTransaction(long id)
         {
             var result = await this.rmHttpClient.DeleteAsync($"transaction/delete?id={id}");
-            if (result.Success) await _notice.Success(new NotificationConfig
+            if (result.Success) _notice.Success(new NotificationConfig
             {
                 Message = "Completato! ",
                 Description = "Categoria secondaria aggiunta con successo"

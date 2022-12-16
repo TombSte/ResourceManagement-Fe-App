@@ -1,0 +1,7 @@
+﻿<div class="spinner-panel" style="@(string.IsNullOrWhiteSpace(Height) ? "" : $"height:{Height}")">
+    <Spin size="large" />
+</div>
+@code {
+    [Parameter]
+    public string? Height { get; set; }
+}

@@ -7,43 +7,43 @@
 @inject TransactionApiClient apiClient;
 
 <Row class="home-panel-title-row">
-    <Col Span="3"><h3>@Title</h3></Col>
-    <Col Span="4"><Search @bind-Value="searchText" Placeholder="Ricerca transazione" EnterButton="true" OnkeyDown="OnSearchChange" /></Col>
+    <Col Span="4"><h3>@Title</h3></Col>
+    <Col Span="5"><Search @bind-Value="searchText" Placeholder="Ricerca transazione" EnterButton="true" OnkeyDown="OnSearchChange" /></Col>
 </Row>
 
 <Table @ref="table"
     ScrollY="500px"
-       TItem="TransactionShort"
        DataSource="@Transactions"
        Total="@TotalItems"
        @bind-PageIndex="PageIndex"
        @bind-PageSize="PageSize"
        OnPageIndexChange="onChangePageIndex">
-    <PropertyColumn Property="c=>c.Title" Sortable />
-    <PropertyColumn Property="c=>c.Amount" Sortable />
-    <PropertyColumn Property="c=>c.TransactionDate" Sortable Format="yyyy-MM-dd"/>
-    <PropertyColumn Property="c=>c.TransactionType" Sortable>
+    <PropertyColumn Property="c=>c.Title" Sortable Title="Titolo"/>
+    <PropertyColumn Property="c=>c.Amount" Sortable Title="Importo">
+        <GridRow Justify="end">
+            <GridCol>
+                <Text>@context.Amount.ToString("0.##") €</Text>
+            </GridCol>
+        </GridRow>
+    </PropertyColumn>
+    <PropertyColumn Property="c=>c.TransactionDate" Sortable Format="yyyy-MM-dd" Title="Data Transazione" />
+    <PropertyColumn Property="c=>c.TransactionType" Sortable Title="Entrata/Uscita">
         <Tag Color="@UIHelper.GetColor(context.TransactionType)">@UIHelper.GetName(context.TransactionType)</Tag>
     </PropertyColumn>
      
-    <ActionColumn>
-        <GridRow Justify="end">
-            <GridCol>
-                <Button Icon="@IconType.Outline.Edit"
-                        Type="@ButtonType.Primary"
-                        OnClick="async () => await EditTransaction(context.Id)">
-                    Gestisci
-                </Button>
-            </GridCol>
-            <GridCol>
-                <Button Danger
-                        Icon="@IconType.Outline.Delete"
-                        Type="@ButtonType.Primary"
-                        OnClick="() => ShowDeleteConfirm(context.Id)">
-                    Elimina
-                </Button>
-            </GridCol>
-        </GridRow>
+    <ActionColumn Title="Azioni" Fixed="right" Width="270" Align="ColumnAlign.Right">
+        <Button Icon="@IconType.Outline.Edit"
+                Type="@ButtonType.Primary"
+                OnClick="async () => await EditTransaction(context.Id)"
+                Style="margin-right:10px">
+            Gestisci
+        </Button>
+        <Button Danger
+                Icon="@IconType.Outline.Delete"
+                Type="@ButtonType.Primary"
+                OnClick="() => ShowDeleteConfirm(context.Id)">
+            Elimina
+        </Button>
     </ActionColumn>
 </Table>
 
@@ -80,6 +80,9 @@
 
     [Parameter]
     public EventCallback<string> OnSearch { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnRefreshRequest { get; set; }
 
     [Parameter]
     public IEnumerable<TransactionShort> Transactions { get; set; }
@@ -121,9 +124,9 @@
                 Content = "Una volta cancellata la transazione non è più possibile eliminarla. Confermare?",
                 OnOk = async (ModalClosingEventArgs e) =>
                 {
-                    e.Cancel = true;
                     await apiClient.DeleteTransaction(transactionId);
-                    await OnPageIndexChange.InvokeAsync(this.PageIndex);
+                    e.Cancel = true;
+                    OnRefreshRequest.InvokeAsync();
                     
                 }
             });

@@ -7,6 +7,7 @@ using ResourceManagement_Fe_App.Authentication;
 using ResourceManagement_Fe_App.Data;
 using ResourceManagement_Fe_App.Helpers;
 using ResourceManagement_Fe_App.Helpers.Clients;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 var moduleConfiguration = builder.Configuration.GetSection("Modules");
@@ -35,6 +36,18 @@ builder.Services.AddHttpClient("RM", c => {
 builder.Services.AddScoped<HttpClient>();
 builder.Services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
 builder.Services.AddScoped<IAuthenticationHelperWriter, AuthenticationHelper>();
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[]
+    {
+        GlobalCulture.CurrentCulture
+    };
+
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

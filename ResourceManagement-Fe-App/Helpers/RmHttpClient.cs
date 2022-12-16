@@ -45,7 +45,7 @@ namespace ResourceManagement_Fe_App.Helpers
             _notice = notice;
         }
 
-        private void ErrorNotification(string text = null)
+        private void ErrorNotification(string? text = null)
         {
             _notice.Error(new()
             {

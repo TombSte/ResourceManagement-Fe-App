@@ -1,4 +1,4 @@
-﻿namespace ResourceManagement_Fe_App.Data.Forms
+﻿namespace ResourceManagement_Fe_App.Data.ApiModel
 {
     public record AddCategory
     {

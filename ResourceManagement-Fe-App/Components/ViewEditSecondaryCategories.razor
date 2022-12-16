@@ -1,13 +1,13 @@
 ﻿@using ResourceManagement_Fe_App.Data.Transactions;
 @inject TransactionApiClient apiClient;
 @using System.Collections.Generic;
-<h3>Modifica Categorie</h3>
+<h3>Modifica Categorie Secondarie</h3>
 @if(isLoading){
     <SpinnerPanel Height="500px" />
 }
 else{
-    <Table DataSource="categories"
-           TItem="Category"
+    <Table DataSource="secondaryCategories"
+           TItem="SecondaryCategory"
            RowClassName="@(_=>"editable-row")"
            Bordered
            ScrollY="500">
@@ -23,31 +23,32 @@ else{
                 }
             </Column>
             <ActionColumn Title="Azioni" Width="200" Align="ColumnAlign.Right">
-                        @if (!editCache[data.Id].edit)
-                        {
-                            <Button OnClick="() => startEdit(data.Id)">Modifica</Button>
-                        }
-                        else
-                        {
-                            <Button OnClick="() => saveEdit(data.Id)" class="save">Applica</Button>
-                        }
+                @if (!editCache[data.Id].edit)
+                {
+                    <Button OnClick="() => startEdit(data.Id)">Modifica</Button>
+                }
+                else
+                {
+                    <Button OnClick="() => saveEdit(data.Id)" class="save">Applica</Button>
+                }
+
             </ActionColumn>
         </ChildContent>
     </Table>
 
-    <Button Type="@ButtonType.Primary" OnClick="async () => await apiClient.UpdateCategoriesAsync(this.categories)">Salva</Button>
+    <Button Type="@ButtonType.Primary" OnClick="async () => await apiClient.UpdateSecondaryCategoriesAsync(this.secondaryCategories)">Salva</Button>
 }
 
 @code {
-    List<Category> categories = new List<Category>();
+    List<SecondaryCategory> secondaryCategories = new List<SecondaryCategory>();
     private bool isLoading = false;
     private async Task UpdateCategories()
     {
         isLoading = true;
         StateHasChanged();
-        var result = await apiClient.GetCategoriesAsync();
-        this.categories = result.ToList();
-        categories.ForEach(item =>
+        var result = await apiClient.GetSecondaryCategoriesAsync();
+        this.secondaryCategories = result.ToList();
+        secondaryCategories.ForEach(item =>
         {
             editCache[item.Id] = (false, item);
         });
@@ -64,7 +65,7 @@ else{
         await base.OnAfterRenderAsync(firstRender);
     }
 
-    IDictionary<int, (bool edit, Category data)> editCache = new Dictionary<int, (bool edit, Category data)>();
+    IDictionary<int, (bool edit, SecondaryCategory data)> editCache = new Dictionary<int, (bool edit, SecondaryCategory data)>();
 
     void startEdit(int id)
     {
@@ -74,14 +75,14 @@ else{
 
     void cancelEdit(int id)
     {
-        var data = categories.FirstOrDefault(item => item.Id == id);
+        var data = secondaryCategories.FirstOrDefault(item => item.Id == id);
         editCache[id] = (false, data); // recovery
     }
 
     void saveEdit(int id)
     {
-        var index = categories.FindIndex(item => item.Id == id);
-        categories[index] = editCache[id].data; // apply the copy to data source
-        editCache[id] = (false, categories[index]); // don't affect rows in editing
+        var index = secondaryCategories.FindIndex(item => item.Id == id);
+        secondaryCategories[index] = editCache[id].data; // apply the copy to data source
+        editCache[id] = (false, secondaryCategories[index]); // don't affect rows in editing
     }
 }

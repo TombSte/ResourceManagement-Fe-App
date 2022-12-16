@@ -14,6 +14,7 @@
                                  PageSize="@pageSize" 
                                  PageIndex="@pageIndex"
                                  OnSearch="OnSearch"
+                                 OnRefreshRequest="GetTransactions"
                                  OnPageIndexChange="OnChangePageIndex"/>
         </TabPane>
         <TabPane Tab="Entrata" Key="incoming">
@@ -23,6 +24,7 @@
                                  PageSize="@pageSize"
                                  PageIndex="@pageIndex" 
                                  OnSearch="OnSearch"
+                                 OnRefreshRequest="GetTransactions"
                                  OnPageIndexChange="OnChangePageIndex" />
         </TabPane>
         <TabPane Tab="Uscita" Key="outgoing">
@@ -32,6 +34,7 @@
                                  PageSize="@pageSize"
                                  PageIndex="@pageIndex" 
                                  OnSearch="OnSearch"
+                                 OnRefreshRequest="GetTransactions"
                                  OnPageIndexChange="OnChangePageIndex" />
         </TabPane>
     </ChildContent>
@@ -54,7 +57,7 @@
     int totalItems = 0;
     int pageIndex = 1;
     string searchText = null;
-    const int pageSize = 10;
+    const int pageSize = 50;
     string activeKey { get; set; } = "1";
     bool loading = false;
     TransactionType? currentType = null;
@@ -89,6 +92,7 @@
 
     async Task OnSearch(string text)
     {
+        this.pageIndex = 1;
         this.searchText = text;
         await GetTransactions();
     }

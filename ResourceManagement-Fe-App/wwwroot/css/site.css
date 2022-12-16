@@ -40,7 +40,7 @@ body .full-layout > main > .site-layout-background {
   height: 100%;
 }
 .home-toolbar .ant-tabs-content .ant-tabs-tabpane .ant-table-wrapper .ant-spin-nested-loading > div .ant-spin-container .ant-table .ant-table-container .ant-table-body {
-  height: calc(100% - 64px) !important;
+  height: calc(100% - 32px) !important;
   max-height: unset !important;
   overflow-y: auto;
 }
@@ -58,4 +58,21 @@ body .full-layout > main > .site-layout-background {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.spinner-panel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ant-table-cell {
+  padding: 7px 16px !important;
+}
+
+.scrollable-page {
+  height: 100%;
+  overflow-x: auto;
 }

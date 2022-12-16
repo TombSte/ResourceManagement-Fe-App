@@ -5,14 +5,16 @@
 <Modal Title="@("Nuova Transazione")"
        Visible="@IsOpen"
        OnOk="@HandleOk"
+       OkButtonProps="new AntDesign.ButtonProps(){ Disabled = !this._canSave }"
        OnCancel="@HandleCancel"
        DestroyOnClose=true
        ConfirmLoading="@_confirmCreateLoading">
-    <p>
+    
         <TransactionForm DefaultValue="newValue"
                          FormMode="Components.Data.FormMode.New"
-                         />
-    </p>
+                     OnValidationFailed="() => _canSave = false"
+                     OnValidationPassed="() => _canSave = true" />
+    
 </Modal>
 
 
@@ -26,7 +28,7 @@
     [Parameter]
     public EventCallback OnClose { get; set; }
 
-
+    bool _canSave = false;
     bool _confirmCreateLoading = false;
 
     TransactionFormData newValue = new();

@@ -7,19 +7,28 @@
 @inject TransactionApiClient apiClient;
 
 <Form @ref="form"
+      OnFieldChanged="OnFieldChanged"
       Layout="@FormLayout.Vertical"
       LabelCol="fieldColSpan"
       WrapperCol="valueColSpan"
+      ValidateMode="@FormValidateMode.Default"
       Model="@DefaultValue"
-      OnFinish="OnFinish" 
-      OnFinishFailed="OnFinishFailed">
+      ValidateOnChange="@true"
+      >
 
     <FormItem Label="Titolo">
-        <Input Style="width:100%;" @bind-Value="@context.Title" />
+        <Input Style="width:100%;" @bind-Value="@context.Title"/>
     </FormItem>
 
     <FormItem Label="Importo">
-        <Input Type="number" Style="width:100%;" @bind-Value="@context.Amount" />
+        <AntDesign.InputNumber 
+            Style="width:100%;" 
+            @bind-Value="@context.Amount" 
+            Formatter="@DoubleUtilities.Format" 
+            Parser="@DoubleUtilities.Parse" 
+            Min="0" 
+            Step="0.01"
+            CultureInfo="@GlobalCulture.CurrentCulture" />
     </FormItem>
 
     <FormItem Label="Data">
@@ -45,7 +54,7 @@
                 LabelName="@nameof(Category.Name)"
                 ValueName="@nameof(Category.Id)"
                 Placeholder="Seleziona una categoria"
-                DefaultActiveFirstOption="true"
+                DefaultActiveFirstOption="false"
                 EnableSearch
                 OnSelectedItemChanged="async (Category value) => await OnSelectedCategoryChangedHandler(value)">
             Seleziona
@@ -142,6 +151,14 @@
     [Parameter]
     public TransactionFormData DefaultValue { get; set; } = new();
 
+    [Parameter]
+    public EventCallback<TransactionFormData> OnFieldIsChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnValidationPassed { get; set; }
+
+    [Parameter]
+    public EventCallback OnValidationFailed { get; set; }
 
     Form<TransactionFormData> form;
     ColLayoutParam fieldColSpan = new ColLayoutParam { Span = "24" };
@@ -171,21 +188,32 @@
         }
     };
 
-    protected override void OnParametersSet()
+    private async Task OnFieldChanged()
     {
-        
-
-        base.OnParametersSet();
+        await Validate();
     }
 
-    private void OnFinish(EditContext editContext)
+    private async Task Validate()
     {
-        Console.WriteLine($"Success:{JsonSerializer.Serialize(DefaultValue)}");
-    }
+        try
+        {
+            var validator = new TransactionFormDataValidator();
+            var result = validator.Validate(DefaultValue);
+            if (result.IsValid)
+            {
+                await OnValidationPassed.InvokeAsync();
+            }
+            else
+            {
+                await OnValidationFailed.InvokeAsync();
+            }
+        }
+        catch (Exception e)
+        {
 
-    private void OnFinishFailed(EditContext editContext)
-    {
-        Console.WriteLine($"Failed:{JsonSerializer.Serialize(DefaultValue)}");
+            var msg = e.Message;
+        }
+
     }
 
     private void OnSelectedTypeChangedHandler(TransactionFormType value)
