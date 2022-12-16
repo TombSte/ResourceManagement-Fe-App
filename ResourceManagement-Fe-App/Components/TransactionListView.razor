@@ -1,12 +1,14 @@
-﻿@using ResourceManagement_Fe_App.Data.Transactions;
+﻿@using ResourceManagement_Fe_App.Data.Forms;
+@using ResourceManagement_Fe_App.Data.Transactions;
 @using ResourceManagement_Fe_App.Data;
 @using ResourceManagement_Fe_App.Helpers.Clients;
 @inject ModalService _modalService;
 @inject TransactionApiClient apiClient;
 
-<div class="home-panel-title-row">
-    <h3>@Title</h3>
-</div>
+<Row class="home-panel-title-row">
+    <Col Span="3"><h3>@Title</h3></Col>
+    <Col Span="4"><Search @bind-Value="searchText" Placeholder="input search text" EnterButton="true" OnkeyDown="OnSearchChange" /></Col>
+</Row>
 
 <Table @ref="table"
     ScrollY="500px"
@@ -20,18 +22,34 @@
     <PropertyColumn Property="c=>c.Amount" Sortable />
     <PropertyColumn Property="c=>c.TransactionDate" Sortable Format="yyyy-MM-dd"/>
     <ActionColumn>
-        <Space>
-            <SpaceItem>
-                <Button 
-                     Danger 
-                     Type="@ButtonType.Primary"
-                        OnClick="() => ShowDeleteConfirm(context.Id)">
-                    Delete
+        <GridRow Justify="end">
+            <GridCol>
+                <Button Icon="@IconType.Outline.Edit"
+                        Type="@ButtonType.Primary"
+                        OnClick="async () => await EditTransaction(context.Id)">
+                    Gestisci
                 </Button>
-            </SpaceItem>
-        </Space>
+            </GridCol>
+            <GridCol>
+                <Button Danger
+                        Icon="@IconType.Outline.Delete"
+                        Type="@ButtonType.Primary"
+                        OnClick="() => ShowDeleteConfirm(context.Id)">
+                    Elimina
+                </Button>
+            </GridCol>
+        </GridRow>
     </ActionColumn>
 </Table>
+
+<TransactionEditFormModal 
+    Transaction="this.selectedTransactionData"
+    IsOpen=@editTransactionIsOpen
+    OnSuccess="async () =>
+        {
+            editTransactionIsOpen = false;
+        }"
+    OnClose="() => { editTransactionIsOpen = false; }" />
 
 
 @code {
@@ -45,7 +63,7 @@
 
     [Parameter]
     public int TotalItems { get; set; }
-    
+
     [Parameter]
     public int PageSize { get; set; }
 
@@ -56,12 +74,36 @@
     public EventCallback<int> OnPageIndexChange { get; set; }
 
     [Parameter]
+    public EventCallback<string> OnSearch { get; set; }
+
+    [Parameter]
     public IEnumerable<TransactionShort> Transactions { get; set; }
+
+    private string searchText;
+    TransactionFormData selectedTransactionData = new();
+    bool editTransactionIsOpen = false;
+
 
     private async Task onChangePageIndex(PaginationEventArgs arg)
     {
         await OnPageIndexChange.InvokeAsync(arg.Page);
     }
+
+    public async Task OnSearchChange(KeyboardEventArgs arg)
+    {
+        if (arg.Key.ToLower().Equals("enter"))
+            await OnSearch.InvokeAsync(searchText);
+    }
+
+    private async Task EditTransaction(long transactionId)
+    {
+        var result = await apiClient.GetTransactionAsync(transactionId);
+        if (result == null) return;
+
+        selectedTransactionData = result;
+        editTransactionIsOpen = true;
+    }
+
 
     private void ShowDeleteConfirm(long transactionId)
     {

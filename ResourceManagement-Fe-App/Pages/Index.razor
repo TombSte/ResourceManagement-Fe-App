@@ -12,7 +12,8 @@
                                  Transactions=@transactions
                                  TotalItems="@totalItems" 
                                  PageSize="@pageSize" 
-                                 PageIndex="@pageIndex" 
+                                 PageIndex="@pageIndex"
+                                 OnSearch="OnSearch"
                                  OnPageIndexChange="OnChangePageIndex"/>
         </TabPane>
         <TabPane Tab="Entrata" Key="incoming">
@@ -21,6 +22,7 @@
                                  TotalItems="@totalItems" 
                                  PageSize="@pageSize"
                                  PageIndex="@pageIndex" 
+                                 OnSearch="OnSearch"
                                  OnPageIndexChange="OnChangePageIndex" />
         </TabPane>
         <TabPane Tab="Uscita" Key="outgoing">
@@ -29,6 +31,7 @@
                                  TotalItems="@totalItems" 
                                  PageSize="@pageSize"
                                  PageIndex="@pageIndex" 
+                                 OnSearch="OnSearch"
                                  OnPageIndexChange="OnChangePageIndex" />
         </TabPane>
     </ChildContent>
@@ -50,6 +53,7 @@
     IEnumerable<TransactionShort> transactions = new List<TransactionShort>();
     int totalItems = 0;
     int pageIndex = 1;
+    string searchText = null;
     const int pageSize = 10;
     string activeKey { get; set; } = "1";
     bool loading = false;
@@ -83,10 +87,28 @@
         await GetTransactions();
     }
 
+    async Task OnSearch(string text)
+    {
+        this.searchText = text;
+        await GetTransactions();
+    }
+
+
     async Task GetTransactions()
     {
         loading = true;
-        var result = await apiClient.GetTransactionsAsync(pageIndex - 1, pageSize, currentType);
+        var filters = new GetTransactions()
+        {
+            DateFrom = null,
+            DateTo = null,
+            PageIndex = pageIndex - 1,
+            PageSize = pageSize,
+            SearchText = searchText,
+            TransactionType = currentType
+        };
+        var result = await apiClient.GetTransactionsAsync(filters);
+        if (result == null)
+            return;
         transactions = result.Transactions;
         totalItems = result.TotalItems;
         loading = false;

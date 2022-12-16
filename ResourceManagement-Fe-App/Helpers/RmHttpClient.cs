@@ -26,7 +26,9 @@ namespace ResourceManagement_Fe_App.Helpers
 		public Task<HttpResult<TResponse>> GetAsync<TResponse>(string url);
 		public Task<HttpResult> PostAsync<TBody>(string url, TBody body);
 		public Task<HttpResult<TResponse>> PostAsync<TBody, TResponse>(string url, TBody body);
-	}
+        public Task<HttpResult> PutAsync<TBody>(string url, TBody body);
+
+    }
 	public class RmHttpClient : IRmHttpClient
 	{
 		private readonly IAuthenticationHelper authHelper;
@@ -149,6 +151,26 @@ namespace ResourceManagement_Fe_App.Helpers
                 };
             }
 
+        }
+
+        public async Task<HttpResult> PutAsync<TBody>(string url, TBody body)
+        {
+            await SetToken();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            try
+            {
+                var response = await this.apiClient.PutAsJsonAsync(url, body);
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception)
+            {
+                ErrorNotification();
+                return new Helpers.HttpResult() { Success = false };
+            }
+            return new Helpers.HttpResult() { Success = true };
         }
 
         private async Task SetToken()

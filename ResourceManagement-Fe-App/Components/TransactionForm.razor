@@ -22,31 +22,30 @@
     </FormItem>
 
     <FormItem Label="Tipologia">
-        <Select TItem="TransactionFormType"
-                TItemValue="string"
+        <Select                 
                 DataSource="@typeItems"
-                @bind-Value="selectedType"
+                @bind-Value="DefaultValue.Type"
                 LabelName="@nameof(TransactionFormType.Name)"
-                ValueName="@nameof(TransactionFormType.Name)"
+                ValueName="@nameof(TransactionFormType.Type)"
                 Placeholder="Seleziona una tipologia"
-                DefaultActiveFirstOption="false"
-                OnSelectedItemChanged="OnSelectedTypeChangedHandler"
+                DefaultActiveFirstOption="true"
                 EnableSearch>
                 Seleziona
         </Select>
     </FormItem>
-
+    @*OnSelectedItemChanged="@(item => OnSelectedCategoryChangedHandler(item))"*@
     <FormItem Label="Categoria">
-        <SimpleSelect @bind-Value="selectedCategory" Style="width:100%;" OnSelectedItemChanged="OnSelectedCategoryChangedHandler">
-            <SelectOptions>
-                @foreach (var item in categories)
-                {
-                    <SimpleSelectOption Value=@item.Id.ToString() Label=@item.Name></SimpleSelectOption>
-                }
-            </SelectOptions>
-        </SimpleSelect>
-        
-        
+        <Select DataSource="@categories"
+                @bind-Value="DefaultValue.CategoryId"
+                LabelName="@nameof(Category.Name)"
+                ValueName="@nameof(Category.Id)"
+                Placeholder="Seleziona una categoria"
+                DefaultActiveFirstOption="true"
+                EnableSearch
+                OnSelectedItemChanged="async (Category value) => await OnSelectedCategoryChangedHandler(value)">
+            Seleziona
+        </Select>
+
         <Row Style="margin-top: 10px">
             <Button Type="@ButtonType.Primary" Icon="@IconType.Outline.Plus" OnClick="() => newCategoriIsOpen = true">Aggiungi</Button>
         </Row>
@@ -54,14 +53,18 @@
     </FormItem>
     
     <FormItem Label="Categoria Secondaria">
-        <SimpleSelect @bind-Value="selectedSecondCategory" Style="width:100%;" OnSelectedItemChanged="OnSelectedSecondaryCategoryChangedHandler">
-            <SelectOptions>
-                @foreach (var item in secondCategories)
-                {
-                    <SimpleSelectOption Value=@item.Id.ToString() Label=@item.Name></SimpleSelectOption>
-                }
-            </SelectOptions>
-        </SimpleSelect>
+        <Select DataSource="@secondCategories"
+                @bind-Value="DefaultValue.SecondaryCategoryId"
+                LabelName="@nameof(SecondaryCategory.Name)"
+                ValueName="@nameof(SecondaryCategory.Id)"
+                Placeholder="Seleziona una categoria secondaria"
+                DefaultActiveFirstOption="false"
+                OnSelectedItemChanged="async (SecondaryCategory value) => await OnSelectedSecondaryCategoryChangedHandler(value)">
+            >
+
+                EnableSearch>
+            Seleziona
+        </Select>
 
         <Row Style="margin-top: 10px">
             <Button Type="@ButtonType.Primary" Icon="@IconType.Outline.Plus" OnClick="() => newSecondaryCategoriIsOpen = true">Aggiungi</Button>
@@ -144,10 +147,6 @@
     int categoryToCreateSecondary = 0;
     string newSecondaryCategory = "";
 
-    string selectedType = "";
-    string selectedCategory = "";
-    string selectedSecondCategory = "";
-
     IEnumerable<Category> categories = new List<Category>();
     IEnumerable<SecondaryCategory> secondCategories = new List<SecondaryCategory>();
 
@@ -164,6 +163,13 @@
             Name = "Entrata"
         }
     };
+
+    protected override void OnParametersSet()
+    {
+        
+
+        base.OnParametersSet();
+    }
 
     private void OnFinish(EditContext editContext)
     {
@@ -197,21 +203,23 @@
         if (firstRender)
         {
             await UpdateCategories();
+            await UpdateSecondaryCategories();
         }
 
         await base.OnAfterRenderAsync(firstRender);
     }
 
-    private async Task OnSelectedCategoryChangedHandler(string value)
+    private async Task OnSelectedCategoryChangedHandler(Category value)
     {
-        DefaultValue.CategoryId = Convert.ToInt32(value);
+        DefaultValue.CategoryId = value.Id;
+        this.DefaultValue.SecondaryCategoryId = null;
         await UpdateSecondaryCategories();
-        this.selectedSecondCategory = "";
+        
     }
 
-    private async Task OnSelectedSecondaryCategoryChangedHandler(string value)
+    private async Task OnSelectedSecondaryCategoryChangedHandler(SecondaryCategory value)
     {
-        DefaultValue.SecondCategoryId = Convert.ToInt32(value);
+        DefaultValue.SecondaryCategoryId = value.Id;
     }
 
 

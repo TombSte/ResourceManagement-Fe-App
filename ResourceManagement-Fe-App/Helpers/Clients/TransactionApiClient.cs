@@ -18,13 +18,29 @@ namespace ResourceManagement_Fe_App.Helpers.Clients
             _notice = notice;
         }
 
-        public async Task<TransactionResult> GetTransactionsAsync(int pageIndex = 0, int pageSize = 20, TransactionType? transactionType = null)
+        public async Task<TransactionResult> GetTransactionsAsync(GetTransactions filters)
 		{
-			string transactionTypeQuery = transactionType.HasValue ? $"&TransactionType={transactionType.Value}" : "";
+			string query = filters.TransactionType.HasValue ? $"&TransactionType={filters.TransactionType.Value}" : "";
 
-            var result = await this.rmHttpClient.GetAsync<TransactionResult>($"transaction/getall?PageSize={pageSize}&PageIndex={pageIndex}{transactionTypeQuery}");
-			return result.Value;
-		}
+            var result = await this.rmHttpClient.PostAsync<GetTransactions, TransactionResult>($"transaction/getall",filters);
+            if (!result.Success) await _notice.Error(new NotificationConfig
+            {
+                Message = "Errore! ",
+                Description = "Impossibile recuperare le transazioni."
+            });
+            return result.Value;
+        }
+
+        public async Task<TransactionFormData> GetTransactionAsync(long id)
+        {
+            var result = await this.rmHttpClient.GetAsync<TransactionFormData>($"transaction?id={id}");
+            if (!result.Success) await _notice.Error(new NotificationConfig
+            {
+                Message = "Errore! ",
+                Description = "Impossibile recuperare la transazione"
+            });
+            return result.Value;
+        }
 
         public async Task<IEnumerable<Category>> GetCategoriesAsync()
         {
@@ -44,6 +60,15 @@ namespace ResourceManagement_Fe_App.Helpers.Clients
             {
                 Message = "Completato! ",
                 Description = "Transazione aggiunta con successo"
+            });
+        }
+        public async Task UpdateTransactionAsync(TransactionFormData data)
+		{
+            var result = await this.rmHttpClient.PutAsync($"transaction", data);
+            if (result.Success) await _notice.Success(new NotificationConfig
+            {
+                Message = "Completato! ",
+                Description = "Transazione aggiornata con successo"
             });
         }
 
