@@ -2,12 +2,13 @@
 @using ResourceManagement_Fe_App.Data.Transactions;
 @using ResourceManagement_Fe_App.Data;
 @using ResourceManagement_Fe_App.Helpers.Clients;
+@using ResourceManagement_Fe_App.Helpers;
 @inject ModalService _modalService;
 @inject TransactionApiClient apiClient;
 
 <Row class="home-panel-title-row">
     <Col Span="3"><h3>@Title</h3></Col>
-    <Col Span="4"><Search @bind-Value="searchText" Placeholder="input search text" EnterButton="true" OnkeyDown="OnSearchChange" /></Col>
+    <Col Span="4"><Search @bind-Value="searchText" Placeholder="Ricerca transazione" EnterButton="true" OnkeyDown="OnSearchChange" /></Col>
 </Row>
 
 <Table @ref="table"
@@ -21,6 +22,10 @@
     <PropertyColumn Property="c=>c.Title" Sortable />
     <PropertyColumn Property="c=>c.Amount" Sortable />
     <PropertyColumn Property="c=>c.TransactionDate" Sortable Format="yyyy-MM-dd"/>
+    <PropertyColumn Property="c=>c.TransactionType" Sortable>
+        <Tag Color="@UIHelper.GetColor(context.TransactionType)">@UIHelper.GetName(context.TransactionType)</Tag>
+    </PropertyColumn>
+     
     <ActionColumn>
         <GridRow Justify="end">
             <GridCol>

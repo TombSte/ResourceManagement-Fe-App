@@ -6,7 +6,8 @@
 @using ResourceManagement_Fe_App.Helpers.Clients;
 @inject TransactionApiClient apiClient;
 
-<Form Layout="@FormLayout.Vertical"
+<Form @ref="form"
+      Layout="@FormLayout.Vertical"
       LabelCol="fieldColSpan"
       WrapperCol="valueColSpan"
       Model="@DefaultValue"
@@ -15,6 +16,10 @@
 
     <FormItem Label="Titolo">
         <Input Style="width:100%;" @bind-Value="@context.Title" />
+    </FormItem>
+
+    <FormItem Label="Importo">
+        <Input Type="number" Style="width:100%;" @bind-Value="@context.Amount" />
     </FormItem>
 
     <FormItem Label="Data">
@@ -137,6 +142,8 @@
     [Parameter]
     public TransactionFormData DefaultValue { get; set; } = new();
 
+
+    Form<TransactionFormData> form;
     ColLayoutParam fieldColSpan = new ColLayoutParam { Span = "24" };
     ColLayoutParam valueColSpan = new ColLayoutParam { Span = "24" };
     ColLayoutParam commandsColSpan = new ColLayoutParam { Span = "24" };
